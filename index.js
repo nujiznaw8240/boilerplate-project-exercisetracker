@@ -76,6 +76,7 @@ app.get('/api/users/:_id/logs', async function(req, res) {
     }
 
     let logs = user.log;
+    const count = logs.length;
     if (fromD || toD) {
       const fromDate = fromD ? new Date(fromD) : new Date(0);
       const toDate = toD ? new Date(toD) : new Date();
@@ -90,7 +91,7 @@ app.get('/api/users/:_id/logs', async function(req, res) {
 
     return res.json({
       username: user.username,
-      count: logs.length,
+      count: count,
       _id: id,
       log: logs.map((log) => ({
         description: log.description,
