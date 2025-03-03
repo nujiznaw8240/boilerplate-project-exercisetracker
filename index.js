@@ -31,8 +31,17 @@ app.post('/api/users/:_id/exercises', async function(req, res) {
     const id = req.params._id;
     const description = req.body.description;
     const duration = Number(req.body.duration);
-    const dateObj = new Date(req.body.date);
-
+    
+    let dateObj;
+    if (req.body.date) {
+      dateObj = new Date(req.body.date);
+      if (isNaN(dateObj.getTime())) {
+        dateObj = new Date();
+        return res.status(404).json({ error: "Invalid date format" });
+      }
+    } else {
+      dateObj = new Date(); // Default to current date if not provided
+    }
 
     //find the user
     let user = await User.findById(id);
@@ -61,6 +70,12 @@ app.post('/api/users/:_id/exercises', async function(req, res) {
   }
 })
 
+app.get('/api/users', async function(req, res) {
+  const users = await User.find({}, '_id username'); // Fetch only _id and username
+  res.json(users);
+})
+
+
 app.get('/api/users/:_id/logs', async function(req, res) {
   try{
   //all the params
@@ -77,9 +92,9 @@ app.get('/api/users/:_id/logs', async function(req, res) {
 
     let logs = user.log;
     const count = logs.length;
-    if (fromD || toD) {
-      const fromDate = fromD ? new Date(fromD) : new Date(0);
-      const toDate = toD ? new Date(toD) : new Date();
+    if (fromD && toD) {
+      const fromDate = new Date(fromD);
+      const toDate = new Date(toD);
       logs = logs.filter((log) => {
         const logDate = log.date;
         return logDate >= fromDate && logDate <= toDate;
